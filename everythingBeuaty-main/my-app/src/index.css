@@ -1,0 +1,765 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+
+h1{
+  color:orange;
+  font-size: 40px;
+  padding-top:0;
+  margin-top:0;
+  font-family:"Poppins";
+}
+img {
+  width: 150px;
+  height: 150px;
+}
+
+.container {
+  width: 200px;
+  height: 150px;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: perspective(1000px);
+  animation: gallery 20s linear infinite;
+  cursor: pointer;
+  margin-left:50px;
+  padding-top: 0;
+}
+
+.container span {
+  position:absolute;
+  width: 100%;
+  height: 150%;
+  transform-style: preserve-3d;
+  transform: rotateY(calc(var(--i) *72deg)) translateZ(130px);
+  -webkit-box-reflect: below 1px linear-gradient(transparent, transparent, black);
+}
+
+.container span img {
+  position:absolute;
+  border-radius: 10px;
+  border: 6px ridge white;
+}
+
+@keyframes gallery {
+  0% {
+    transform: perspective(1000px) rotateY(0deg);
+  }
+  100% {
+    transform: perspective(1000px) rotateY(360deg);
+  }
+}
+
+body{
+  background-image: url('image/backI.jpeg');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+#menu{
+  padding-left:900px;
+}
+.navigation{
+  position: relative;
+  width: 350px;
+  height: 70px;
+  background-color:rgb(145, 142, 142);
+  border-radius: 10px;
+  box-shadow: 15px 20px 15px #eed4d4;
+  margin: 0 auto;
+}
+.navigation ul{
+  display: flex;
+  justify-content: space-around;
+  padding: 0%;
+  margin:0;
+  position: relative;
+  align-items: center;
+}
+.navigation ul li{
+  align-items: center;
+  list-style: none;
+  z-index: 1;
+  cursor: pointer;
+  padding-top:10px;
+}
+.navigation ul li a{
+  display: flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  height: 60px;
+  width: 100%;
+  font-weight: 500;
+  text-decoration: none;
+}
+.navigation ul li a .icon{
+  display: block;
+  text-align: center;
+  transition: 0.5s;
+  font-size: 1.3rem;
+}
+.navigation ul li a .text{
+  position: static;
+  color: blueviolet;
+  font-weight:500;
+  font-size: 1rem;
+  transform:none;
+  transition: 0.3s;
+}
+.navigation ul li a:hover{
+  transform: scale(1.1);
+}
+a.active{color:aquamarine;}
+
+/* Hamburger button styles */
+.menu-btn {
+  display:none;
+  flex-direction:column;
+  justify-content: space-between;
+  cursor: pointer;
+  width: 25px;
+  height: 20px;
+  transition: transform 0.3s ease;
+  background-color: rgb(145, 142, 142);
+  border-radius: 5px;
+  margin-left:80%;
+  padding:5px;
+}
+.menu-btn span {
+  height: 3px;
+  width: 100%;
+  background-color: white;
+  transition: all 0.3s ease;
+}
+.menu-btn:hover span{
+  background-color:wheat;
+}
+.menu-btn.open span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+.menu-btn.open span:nth-child(2) {
+  opacity: 0;
+}
+.menu-btn.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* Hamburger functionality */
+@media (max-width: 768px) {
+  #menu {
+    padding-left: 0;
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 1rem;
+  }
+  .menu-btn {
+    display: flex;
+  }
+  .navigation {
+    display: none;
+    flex-direction: column;
+    background-color: rgb(145, 142, 142);
+    position: absolute;
+    top: 80px;
+    right: 20px;
+    width: 50%;
+    height:60%;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+  }
+  .navigation.show {
+    display: flex;
+  }
+  .navigation ul {
+    flex-direction: column;
+    width: 100%;
+  }
+  .navigation ul li {
+    text-align: center;
+    margin: 10px 0;
+  }
+}
+
+p{
+  padding-top: 0;
+  text-align: center;
+  font-size:35px;
+  color:rgb(230, 196, 228);
+}
+.InputText{
+  display: block;
+  text-align: center;
+  margin-top:0;
+  padding-top: 0;
+}
+.InputText input{
+  width: 300px;
+  height: 30px; 
+  margin-bottom: 5px;
+}
+.InputText input[type="submit"]{
+  width: 150px;
+  height: 30px;
+  border-radius:10px;
+}
+.register {
+  max-width: 400px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background-color:plum;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  animation: popIn 0.5s ease forwards;
+  transform-origin: center;
+}
+.register input {
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.7rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+.register button {
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.7rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  background-color:purple;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+.text-danger{color:rgb(148, 6, 6);}
+.signup label{
+  text-decoration: underline;
+}
+.signup label:hover{
+  color:blue;
+  cursor: pointer;
+}
+
+.dashboard {
+
+  margin-top: 0;
+  padding-top: 0;
+  display: flex;
+  flex-direction: column;
+}
+.dashboard label{
+  text-align: center;
+  padding-top: 0;
+  margin-top: 0;
+  font-size: 40px;
+  color:orange
+  
+}
+.dashboard button{
+  padding: 5px;
+  font-size: 20px;
+  background-color:rgb(167, 12, 167);
+  color:white;
+  border-radius:10px;
+  cursor: pointer;
+  width:12%;
+}
+.dashboard button:hover{
+  background-color:rgb(224, 150, 224);
+  color:white;
+}
+
+.Login{
+   max-width: 400px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background-color:plum;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  animation: popIn 0.5s ease forwards;
+  transform-origin: center;
+}
+.Login input {
+  margin-top:1rem ;
+  display: block;
+  width: 100%;
+  padding: 0.7rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.Login input[type="submit"] {
+  background-color:purple;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 20px;
+  margin-left: 110px;
+  padding-top: 5px ;
+  transition: background-color 0.3s ease;
+}
+.WelcomeMessage label{
+ 
+ font-size:3rem;
+ cursor: pointer;
+ color:antiquewhite;
+ font-size:bold;
+}
+
+
+.WelcomeMessage h3{
+  color:rgb(196, 141, 201);
+  font-size:2rem;
+  
+}
+.WelcomeMessage h3 label{
+ text-decoration: underline;
+ cursor: pointer;
+ color:antiquewhite;
+ font-size:bold;
+ font-size:2rem;
+}
+
+.WelcomeMessage h3 label:hover{
+ 
+  color:rgb(199, 110, 159);
+}
+
+
+.salonReg input{
+  margin-bottom:1rem;
+  margin-top:1rem;
+  font-size:1.5rem;
+  margin-left:0.5rem;
+}
+.salonReg label{
+  font-size:1.5rem;
+  margin-left:0.5rem;
+  
+}
+.salonReg h3{
+  font-size:1.5rem;
+  margin-left:0.5rem;
+}
+.salonReg{
+  border-color: antiquewhite;
+  background-color:rgb(235, 147, 213);
+  width:60%; 
+  height:80%
+}
+.salonReg button{
+margin-left:40%;
+ background-color:purple;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size:1.5rem;
+}
+
+.salondisplay{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
+  
+}
+
+
+.salondisplay .contain{
+  background-color:rgb(235, 147, 213);
+  border-radius: 10px;
+  width: 18.75rem;
+  padding: 15px;
+}
+.salondisplay .contain h2{
+  text-align: center;
+  color:#96098f;
+  font-size: 2rem;
+}
+.salondisplay .contain p{
+  text-align: center;
+  font-size: 1rem;
+  color:rgb(163, 2, 158)
+}
+
+.salon-gallery {
+  position: relative;
+  width: 100%;
+  height:200px;
+  overflow: hidden;
+  border-radius: 10px;
+  margin-top: 10px;
+   
+}
+.salon-gallery-track {
+  display: flex;
+  width:fit-content;
+  animation: scroll 20s linear infinite; 
+}
+
+.salon-gallery img {
+  width:200px;  
+  height: 200px;
+  object-fit: cover;
+  margin-right: 10px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  object-fit: cover; 
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%); 
+  }
+}
+
+
+.salondisplay button{
+  margin: 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  width: 40%;
+  border: none;
+  cursor: pointer;
+  color:thistle;
+  background-color:rgb(167, 12, 167);
+}
+.salondisplay button:hover{
+  background-color:rgb(224, 150, 224);
+  color:white;
+}
+
+.bookservice button{
+  margin-top:2rem;
+  text-align: center;
+  font-size:1rem;
+  width:30%;
+  background-color:white;
+  height:5%;
+  color:rgb(99, 5, 75);
+  border-color: #ccc;
+}
+.bookservice h2{
+  color:rgb(99, 5, 75);
+  font-size:2rem;
+  text-align: center;
+}
+.bookservice p{
+font-size:1.5rem;
+color:rgb(99, 5, 75);
+
+}
+.bookservice label{
+ font-size:2rem;
+ color:#96098f;
+ 
+}
+
+.Confirm button{
+ background-color: #96098f;
+  color:#ccc;
+  margin-top:7rem;
+  justify-content: center;
+  margin-left:30%;
+  width:40%;
+  height:3rem;
+  font-size:1.5rem;
+
+}
+.ServiceChoose select{
+background-color:white;
+margin-top:3rem;
+color:rgb(59, 5, 46);
+}
+.Background{
+  background-color:rgb(235, 147, 213);
+  width:50%;
+  height:30rem;
+  border-radius:5%;
+  padding:5rem;
+}
+
+.booking-list {
+  display:flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin: 1rem; 
+  gap: 1rem;
+}
+.book-card p{
+  font-size: 1rem;
+  color:#96098f;
+}
+
+.BookingApproval button{
+  margin:1rem;
+  background-color: #96098f;
+  color:#ccc;
+
+}
+.BookingApproval button:hover{
+   background-color:rgb(235, 147, 213);
+  color:#96098f;
+}
+.Customer button{
+  margin:0.5rem;
+  background-color: #96098f;
+  color:#ccc;
+}
+.decline button{
+
+background-color: #ecc2ea;
+color:purple;
+margin-right:1rem;
+}
+
+.decline button:hover{
+  background-color: #d3a5d1;
+}
+.DeclineModal{
+  max-width: 400px;
+  margin: 3rem auto;
+  padding: 2rem; 
+  background-color:plum;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  animation: popIn 0.5s ease forwards;
+  transform-origin: center;
+}
+.DeclineModal p{
+  color:#96098f;
+}
+.DeclineModal label{
+  display:flex;
+  margin-bottom:0.5rem;
+}
+.completeStatus button{
+  border-radius: 6px;
+
+}
+
+
+/*max 480px*/
+@media (max-width: 480px) {
+
+  body {
+    background-size: cover;
+    background-position: center;
+    font-size:20px;
+  }
+ h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+
+  p {
+    font-size: 1.2rem;
+    padding: 0 10px;
+  }
+  .navigation {
+  font-size:1rem; display:flex;
+  }
+ .navbar { width:50%; margin-left:50%; }
+  .container {
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    transform: perspective(800px);
+  }
+
+  .register,
+  .Login,
+  .salonReg,
+  .Background {
+    width: 90%;
+    height: auto;
+    padding: 1.5rem;
+    margin: 2rem auto;
+  }
+
+  .register input,
+  .Login input,
+  .salonReg input {
+    width: 100%;
+    font-size: 1rem;
+  }
+
+  .register button,
+  .Login input[type="submit"],
+  .salonReg button {
+    width: 100%;
+    font-size: 1rem;
+    margin: 1rem 0;
+  }
+
+  .salondisplay {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .salondisplay .contain {
+    width: 90%;
+  }
+
+  .bookservice button {
+    width: 80%;
+  }
+
+  .dashboard button {
+    width: 80%;
+  }
+
+  .booking-list {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .book-card {
+    width: 90%;
+    padding: 1rem;
+  }
+
+  .Confirm button {
+    width: 80%;
+    margin-left: 10%;
+  }
+}
+
+/*601px - 768px*/
+@media (min-width: 601px) and (max-width: 1024px) {
+  h1 {
+    font-size: 2.5rem;
+  }
+
+  .navigation {
+    width: 80%;
+    height: auto;
+  }
+  .navbar{
+    width:55%;
+    height:60vh;
+    margin-left:40%;
+    position: fixed;
+    display: none;
+  
+    justify-content: center;
+    transition: 2s ease;
+    top:60px;
+  }
+
+  .salondisplay {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+  }
+
+  .salondisplay .contain {
+    width: 100%;
+  }
+
+  .booking-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+
+  .register,
+  .Login,
+  .salonReg {
+    width: 80%;
+  }
+
+  .dashboard button {
+    width: 40%;
+  }
+}
+
+/*1025px and above*/
+@media (min-width: 1025px) {
+  .navigation {
+    max-width: 500px;
+  }
+
+  .salondisplay {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .booking-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+.UserSalonInfo p {
+  font-size:1.2rem;
+  color:rgb(176, 187, 177);
+  display: flex;
+  flex-direction: column;
+  
+}
+.forgotPassword label{
+  text-decoration: underline;
+  cursor: pointer;
+  color:black;
+}
+.forgotPassword label:hover{
+  color:blue;
+}
+
+.forgot{
+  max-width: 400px;
+  margin: 3rem auto;
+  padding: 2rem;
+  
+  background-color:plum;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  animation: popIn 0.5s ease forwards;
+  transform-origin: center;
+}
+.forgot input {
+  margin-top:1rem ;
+  display: block;
+  width: 100%;
+  padding: 0.7rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+.forgot input[type="submit"] {
+  background-color:purple;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 20px;
+  transition: background-color 0.3s ease;
+}
+.forgot h2{
+  text-align: center;
+  color:rgb(99, 5, 75);
+  font-size:2rem;
+}

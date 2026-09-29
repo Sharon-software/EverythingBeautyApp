@@ -69,7 +69,7 @@ const Regsalon = () => {
 
     try {
       const response = await axiosInstance.post(
-        "http://127.0.0.1:8000/api/v1/salons/",
+        "/salons/",
         formData,
         {
           headers: {

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthProvider } from "../AuthContext";
 import LoadingButton from "./Loading";
+import { baseUrl } from "../Axiosinstance";
 
 const Login = () => {
 
@@ -23,7 +24,7 @@ const Login = () => {
     
 
     try{
-      const response = await axios.post("http://127.0.0.1:8000/api/v1/token/", userData);
+      const response = await axios.post(`${baseUrl}/token/`, userData);
       localStorage.setItem("accessToken", response.data.access);
       localStorage.setItem("refreshToken", response.data.refresh);
      console.log("Login successful");

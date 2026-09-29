@@ -95,6 +95,14 @@ cd client && npm start
 
 Visit `http://localhost:3000` — API runs on `http://localhost:8000`
 
+## Deploying to Render
+
+The repository includes a `render.yaml` Blueprint for the React static site, Django API, and PostgreSQL database. In Render, create a new Blueprint instance from this repository and select the repository root containing `render.yaml`. The Blueprint builds both services and runs database migrations when the API starts.
+
+Set `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, and `DEFAULT_FROM_EMAIL` in the API service to enable account verification and password-reset email. Rotate the Gmail app password previously present in source before deploying. Without SMTP credentials, Django uses its console email backend and email workflows will not reach users.
+
+Salon photos currently use local filesystem storage. Render's filesystem is ephemeral, so configure durable object storage before relying on uploaded photos in production.
+
 ## 📡 API Overview
 
 | Method | Endpoint | Description |

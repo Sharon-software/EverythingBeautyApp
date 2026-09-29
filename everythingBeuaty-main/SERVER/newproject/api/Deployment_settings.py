@@ -3,10 +3,15 @@ import dj_database_url
 from newproject.settings import *
 from newproject.settings import BASE_DIR
 
-ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTING')]
-CSRF_TRUSTED_ORIGINS =['https://' + os.environ.get('RENDER_EXTERNAL_HOSTING')]
-DEBUG=False
-SECRET_KEY = os.environ.get('SECRET_KEY')
+render_hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+frontend_host = os.environ.get("FRONTEND_HOST")
+
+ALLOWED_HOSTS = [render_hostname] if render_hostname else []
+CSRF_TRUSTED_ORIGINS = [f"https://{frontend_host}"] if frontend_host else []
+CORS_ALLOWED_ORIGINS = [f"https://{frontend_host}"] if frontend_host else []
+FRONTEND_URL = f"https://{frontend_host}" if frontend_host else "http://localhost:3000"
+DEBUG = False
+SECRET_KEY = os.environ["SECRET_KEY"]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -34,8 +39,19 @@ STORAGES = {
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),  # Render PostgreSQL URL
-        conn_max_age=600
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True,
     )
 }
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 

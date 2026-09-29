@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: everythingbeauty-api
+    runtime: python
+    plan: free
+    region: frankfurt
+    rootDir: everythingBeuaty-main/SERVER/newproject
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: python manage.py migrate --noinput && gunicorn newproject.wsgi:application --bind 0.0.0.0:$PORT --log-level info --access-logfile - --error-logfile -
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: DJANGO_SETTINGS_MODULE
+        value: api.Deployment_settings
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: FRONTEND_HOST
+        value: everythingbeauty-web.onrender.com
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+
+  - type: web
+    name: everythingbeauty-web
+    runtime: static
+    rootDir: everythingBeuaty-main/my-app
+    buildCommand: npm ci && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_BACKEND_HOST
+        value: everythingbeauty-api.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

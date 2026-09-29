@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { FaSpinner } from 'react-icons/fa'; 
 import LoadingButton from './Loading';
+import { baseUrl } from '../Axiosinstance';
 
 function getCookie(name) {
   let cookieValue = null;
@@ -39,7 +40,7 @@ const Register = () => {
     const data = { first_name: firstname, last_name: lastname, email, password };
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/signup/', data);
+      const response = await axios.post(`${baseUrl}/signup/`, data);
       setSuccess(true);
       alert("A verification code has been sent you email address");
       setStep('verify');
@@ -76,7 +77,7 @@ const Register = () => {
     const csrfToken = getCookie('csrftoken');
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/v1/verify/', payload, {
+      const response = await axios.post(`${baseUrl}/verify/`, payload, {
         headers: { 'X-CSRFToken': csrfToken }
       });
 

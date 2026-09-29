@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AxiosInstance from "../../Axiosinstance";
+import AxiosInstance, { baseUrl } from "../../Axiosinstance";
 import { AuthProvider } from "../../AuthContext";
 import axiosInstance from "../../Axiosinstance";
 import DeclineModal from "../dashboard/DeclineModal";
@@ -43,7 +43,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchSalons = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/v1/salons/");
+        const res = await fetch(`${baseUrl}/salons/`);
         if (!res.ok) throw new Error("Failed to fetch salons");
         const data = await res.json();
         setSalons(data);

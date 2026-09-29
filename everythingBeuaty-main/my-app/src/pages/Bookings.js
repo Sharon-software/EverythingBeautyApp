@@ -2,6 +2,7 @@ import React from 'react'
 import { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import LoadingButton from './Loading';
+import { baseUrl } from '../Axiosinstance';
 
 const Bookings = () => {
  const [salons, setSalons] = useState([]);
@@ -12,7 +13,7 @@ const Bookings = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/v1/salons/")
+    fetch(`${baseUrl}/salons/`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch salons");
         return res.json();

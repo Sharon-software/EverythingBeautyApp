@@ -376,7 +376,7 @@ def forgot_password(request):
     profile.reset_token = reset_token
     profile.save()
     
-    reset_link = f"http://localhost:3000/reset-password/{reset_token}"
+    reset_link = f"{settings.FRONTEND_URL.rstrip('/')}/reset-password/{reset_token}"
     
     try:
         send_mail(

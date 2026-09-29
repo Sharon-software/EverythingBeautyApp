@@ -2,6 +2,7 @@ import React from 'react'
 import { useState } from "react";
 import axios from "axios";
 import LoadingButton from './Loading';
+import { baseUrl } from '../Axiosinstance';
 
 
 const ForgotPassword = () => {
@@ -11,7 +12,7 @@ const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-        await axios.post("http://127.0.0.1:8000/api/v1/forgot-password/", { email });
+        await axios.post(`${baseUrl}/forgot-password/`, { email });
         alert("Password reset link sent to your email.");
     } catch (err) {
         alert("Failed to send reset link. Please try again.");

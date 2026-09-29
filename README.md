@@ -2,7 +2,7 @@
 
 A booking platform for salon services, allowing clients to schedule appointments, view available time slots, and manage bookings. Built to make life easier for both clients booking a service and salon staff managing their day.
 
-🔗 Repo: [EverythingBeautyApp](https://github.com/sharon-software/EverythingBeautyApp)
+🔗 Deployment link:https://everythingbeauty-web.onrender.com
 
 ## ✨ Features
 

@@ -28,7 +28,7 @@ const Register = () => {
   const [password, setPassword] = useState("");  
   const [code, setCode] = useState("");
   const [error, setErrors] = useState({});
-  const [success, setSuccess] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -37,24 +37,30 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     setErrors({});
+    setStatusMessage("Sending verification code...");
     const data = { first_name: firstname, last_name: lastname, email, password };
 
     try {
-      const response = await axios.post(`${baseUrl}/signup/`, data);
-      setSuccess(true);
-      alert("A verification code has been sent you email address");
+      await axios.post(`${baseUrl}/signup/`, data, { timeout: 15000 });
+      setStatusMessage("");
       setStep('verify');
     } catch (err) {
       const responseData = err.response?.data || {};
-      
+
       if (responseData.message && responseData.message.includes("unverified")) {
-        // Email exists but not verified
         setErrors({ email: responseData.message });
+        setStatusMessage("");
         setStep('verify');
-      } else if (responseData.message) {
-        setErrors({ email: responseData.message });
       } else {
-        setErrors(responseData);
+        const message = responseData.message || (
+          err.code === "ECONNABORTED"
+            ? "Registration timed out. Please try again."
+            : err.response
+              ? "Registration failed. Please try again."
+              : "Unable to reach the server. Check your connection and try again."
+        );
+        setErrors({ email: message });
+        setStatusMessage("");
       }
 
       console.error("Registration error:", responseData);
@@ -77,15 +83,21 @@ const Register = () => {
     const csrfToken = getCookie('csrftoken');
 
     try {
-      const response = await axios.post(`${baseUrl}/verify/`, payload, {
-        headers: { 'X-CSRFToken': csrfToken }
+      await axios.post(`${baseUrl}/verify/`, payload, {
+        headers: { 'X-CSRFToken': csrfToken },
+        timeout: 15000,
       });
 
       alert("Account verified! You can now login.");
       navigate('/login');
     } catch (err) {
       const responseData = err.response?.data || {};
-      setErrors({ code: responseData.message || "Verification failed" });
+      const message = responseData.message || (
+        err.code === "ECONNABORTED"
+          ? "Verification timed out. Please try again."
+          : "Unable to verify your account. Please try again."
+      );
+      setErrors({ code: message });
       console.error("Verification error:", responseData);
     } finally {
       setLoading(false);
@@ -104,20 +116,19 @@ const Register = () => {
           <input type="password" placeholder="Enter Password" value={password} onChange={(e) => setPassword(e.target.value)} />
           {error.password && <small className="text-danger">{error.password}</small>}
 
-          {success && (
-            <div className="alert alert-success">
-              Registration Successful! Check your email for verification code.
-            </div>
-          )}
-
-          <button type="submit" disabled={loading}>
+          <button type="submit" disabled={loading} aria-label={loading ? "Sending verification code" : "Register Account"}>
             {loading ? <FaSpinner className="spin" /> : "Register Account"}
           </button>
+          {statusMessage && <small role="status">{statusMessage}</small>}
         </form>
       )}
 
       {step === 'verify' && (
         <form onSubmit={handleVerify}>
+          <div role="status" style={{ color: "darkgreen", marginBottom: "1rem" }}>
+            Verification code sent to {email}. Check your inbox and spam folder.
+          </div>
+          {error.email && <small className="text-danger">{error.email}</small>}
           <input type="text" placeholder="Enter Verification Code" value={code} onChange={(e) => setCode(e.target.value)} />
           {error.code && <small className="text-danger">{error.code}</small>}
           <LoadingButton type="submit" disabled={loading}>Verify Account</LoadingButton>

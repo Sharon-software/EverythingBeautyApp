@@ -120,7 +120,7 @@ const Register = () => {
         <form onSubmit={handleVerify}>
           <input type="text" placeholder="Enter Verification Code" value={code} onChange={(e) => setCode(e.target.value)} />
           {error.code && <small className="text-danger">{error.code}</small>}
-          <LoadingButton type="submit" value="Verify Account" disabled={loading} />
+          <LoadingButton type="submit" disabled={loading}>Verify Account</LoadingButton>
         </form>
       )}
     </div>

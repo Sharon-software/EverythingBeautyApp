@@ -16,6 +16,25 @@ from django.conf import settings
 from rest_framework import status
 from django.utils.crypto import get_random_string
 from django.db.models import Q
+import logging
+
+
+logger = logging.getLogger(__name__)
+
+
+def _send_verification_email(email, code):
+    try:
+        sent_count = send_mail(
+            "Verify your account",
+            f"Your verification code is: {code}",
+            settings.DEFAULT_FROM_EMAIL,
+            [email],
+            fail_silently=False,
+        )
+    except Exception:
+        logger.exception("Unable to send verification email to %s", email)
+        return False
+    return sent_count == 1
 
 
 
@@ -287,14 +306,11 @@ def signup(request):
     if pending:
         pending.verification_code = str(random.randint(100000, 999999))
         pending.save()
-
-        send_mail(
-            "Verify your account",
-            f"Your verification code is: {pending.verification_code}",
-            settings.DEFAULT_FROM_EMAIL,
-            [email],
-            fail_silently=False,
-        )
+        if not _send_verification_email(email, pending.verification_code):
+            return Response({
+                "success": False,
+                "message": "Verification email could not be sent. Please try again later."
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
         return Response({
             "success": False,
             "message": "Email already exists but is unverified. Verification code resent to your email."
@@ -309,13 +325,11 @@ def signup(request):
         verification_code=code,
     )
 
-    send_mail(
-        "Verify your account",
-        f"Your verification code is: {code}",
-        settings.DEFAULT_FROM_EMAIL,
-        [email],
-        fail_silently=True,
-    )
+    if not _send_verification_email(email, code):
+        return Response({
+            "success": False,
+            "message": "Verification email could not be sent. Please try again later."
+        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
     return Response({"success": True, "message": "Verification code sent to your email"})
 

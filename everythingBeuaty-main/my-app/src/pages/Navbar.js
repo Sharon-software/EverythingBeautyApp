@@ -48,18 +48,22 @@ const Navbar = () => {
      </h1>
 
      <div id="menu">
-    <div
+    <button
+      type="button"
       ref={btnRef}
       className={`menu-btn ${isOpen ? "open" : ""}`}
+      aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+      aria-expanded={isOpen}
+      aria-controls="site-navigation"
       onClick={() => setIsOpen(!isOpen)}
     >
       <span></span>
       <span></span>
       <span></span>
-    </div>
+    </button>
 
    
-     <div ref={navRef} className={`navigation ${isOpen ? "show" : ""}`}>
+     <div id="site-navigation" ref={navRef} className={`navigation ${isOpen ? "show" : ""}`}>
 
       <ul>
         <li>

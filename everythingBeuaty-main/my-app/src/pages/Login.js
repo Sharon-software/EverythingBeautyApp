@@ -51,7 +51,7 @@ const Login = () => {
         
         {error && <div className="text-danger"> {error} </div>}
 
-          <LoadingButton type="submit" /> <br />
+          <LoadingButton type="submit">Login</LoadingButton> <br />
         </form>
         
 

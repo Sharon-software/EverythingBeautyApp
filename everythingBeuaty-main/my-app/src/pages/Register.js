@@ -41,7 +41,7 @@ const Register = () => {
     const data = { first_name: firstname, last_name: lastname, email, password };
 
     try {
-      await axios.post(`${baseUrl}/signup/`, data, { timeout: 15000 });
+      await axios.post(`${baseUrl}/signup/`, data, { timeout: 90000 });
       setStatusMessage("");
       setStep('verify');
     } catch (err) {

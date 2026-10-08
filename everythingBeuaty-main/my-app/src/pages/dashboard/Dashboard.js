@@ -159,7 +159,36 @@ const approvedToday = salonCustomerBookings.some(b => {
             You have {userSalons.length} salon(s) registered.
           </h4>
 
-         
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", margin: "16px 0" }}>
+            {userSalons.map((salon) => (
+              <button
+                key={salon.id}
+                type="button"
+                onClick={() => navigate('/RegSalon', { state: { salon } })}
+                style={{
+                  background: "#fff",
+                  border: "1px solid #d9bfdc",
+                  borderRadius: "12px",
+                  padding: "12px",
+                  minWidth: "220px",
+                  cursor: "pointer",
+                  textAlign: "left",
+                }}
+              >
+                {salon.gallery?.[0] && (
+                  <img
+                    src={salon.gallery[0]}
+                    alt={salon.salon_name}
+                    style={{ width: "100%", height: "120px", objectFit: "cover", borderRadius: "8px", marginBottom: "8px" }}
+                  />
+                )}
+                <div style={{ fontWeight: "700", color: "#4b1f4f" }}>{salon.salon_name}</div>
+                <div style={{ color: "#666" }}>{salon.location}</div>
+                <div style={{ color: "#8a4d80", marginTop: "6px" }}>Edit salon</div>
+              </button>
+            ))}
+          </div>
+
     <p> 
      
     Booking summary:

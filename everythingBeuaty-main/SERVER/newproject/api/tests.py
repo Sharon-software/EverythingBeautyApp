@@ -1,9 +1,14 @@
+import json
+import tempfile
 from unittest.mock import patch
 
+from django.contrib.auth import get_user_model
 from django.core import mail
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
+from rest_framework.test import APIClient
 
-from .models import PendingUser
+from .models import PendingUser, Salon
 
 
 @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
@@ -32,3 +37,75 @@ class SignupEmailTests(TestCase):
 		self.assertEqual(response.status_code, 503)
 		self.assertFalse(response.data["success"])
 		self.assertTrue(PendingUser.objects.filter(email="test@example.com").exists())
+
+
+class SalonGalleryTests(TestCase):
+	def setUp(self):
+		self.media_directory = tempfile.TemporaryDirectory()
+		self.addCleanup(self.media_directory.cleanup)
+		self.media_settings = override_settings(MEDIA_ROOT=self.media_directory.name)
+		self.media_settings.enable()
+		self.addCleanup(self.media_settings.disable)
+		self.client = APIClient()
+		self.user = get_user_model().objects.create_user(
+			username="owner@example.com",
+			email="owner@example.com",
+			password="secret123",
+			first_name="Owner",
+		)
+		self.client.force_authenticate(user=self.user)
+
+	def test_salons_store_gallery_uploads_and_services(self):
+		image = SimpleUploadedFile(
+			"salon.jpg",
+			b"fake-image-data",
+			content_type="image/jpeg",
+		)
+		payload = {
+			"salon_name": "Beauty House",
+			"location": "Cape Town",
+			"startT": "09:00",
+			"endT": "17:00",
+			"services": json.dumps([
+				{"service_name": "Haircut", "price": "250.00"},
+			]),
+			"gallery_upload": [image],
+		}
+
+		response = self.client.post("/api/v1/salons/", payload, format="multipart")
+
+		self.assertEqual(response.status_code, 201, response.data)
+		salon = Salon.objects.get(salon_name="Beauty House")
+		self.assertEqual(salon.gallery.count(), 1)
+		self.assertTrue(salon.services_items.filter(service_name="Haircut").exists())
+		self.assertIn("/media/", response.data["gallery"][0])
+		gallery_image = salon.gallery.get().image
+		with override_settings(DEBUG=False):
+			image_response = self.client.get(f"/media/{gallery_image.name}")
+		self.assertEqual(image_response.status_code, 200)
+		try:
+			self.assertEqual(b"".join(image_response.streaming_content), b"fake-image-data")
+		finally:
+			image_response.close()
+
+		service = salon.services_items.get(service_name="Haircut")
+		update_response = self.client.patch(
+			f"/api/v1/salons/{salon.id}/",
+			{
+				"salon_name": "Beauty House Updated",
+				"location": "Johannesburg",
+				"services": json.dumps([
+					{"id": service.id, "service_name": "Haircut and Style", "price": "300.00"},
+				]),
+			},
+			format="multipart",
+		)
+
+		self.assertEqual(update_response.status_code, 200, update_response.data)
+		salon.refresh_from_db()
+		service.refresh_from_db()
+		self.assertEqual(salon.salon_name, "Beauty House Updated")
+		self.assertEqual(salon.location, "Johannesburg")
+		self.assertEqual(salon.gallery.count(), 1)
+		self.assertEqual(service.service_name, "Haircut and Style")
+		self.assertEqual(str(service.price), "300.00")

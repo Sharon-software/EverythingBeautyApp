@@ -21,7 +21,10 @@ class SalonSerializer(serializers.ModelSerializer):
 
     def get_gallery(self, obj):
         request = self.context.get('request')
-        return [request.build_absolute_uri(img.image.url) for img in obj.gallery.all()]
+        gallery = [img.image.url for img in obj.gallery.all()]
+        if request is None:
+            return gallery
+        return [request.build_absolute_uri(url) for url in gallery]
 
 class BookingSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)

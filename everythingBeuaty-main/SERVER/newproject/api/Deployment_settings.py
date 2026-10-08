@@ -12,6 +12,8 @@ CORS_ALLOWED_ORIGINS = [f"https://{frontend_host}"] if frontend_host else []
 FRONTEND_URL = f"https://{frontend_host}" if frontend_host else "http://localhost:3000"
 DEBUG = False
 SECRET_KEY = os.environ["SECRET_KEY"]
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

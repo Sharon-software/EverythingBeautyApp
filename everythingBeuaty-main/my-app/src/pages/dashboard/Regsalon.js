@@ -1,5 +1,5 @@
 import React, { useState,useEffect,useCallback} from 'react';
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axiosInstance from '../../Axiosinstance';
 import axios from 'axios';
 import LoadingButton from '../Loading';
@@ -16,6 +16,27 @@ const Regsalon = () => {
   const navigate = useNavigate();
   const [suggestions, setSuggestions] = useState([])
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
+  const editingSalon = location.state?.salon;
+
+  useEffect(() => {
+    if (!editingSalon) return;
+
+    setSalonName(editingSalon.salon_name || "");
+    setLocation(editingSalon.location || "");
+    setStartTime(editingSalon.startT || "");
+    setEndTime(editingSalon.endT || "");
+
+    const salonServices = Array.isArray(editingSalon.services_list)
+      ? editingSalon.services_list.map((service) => ({
+          id: service.id,
+          service_name: service.service_name || "",
+          price: service.price ?? "",
+        }))
+      : [{ service_name: "", price: "" }];
+
+    setServices(salonServices.length ? salonServices : [{ service_name: "", price: "" }]);
+  }, [editingSalon]);
 
   
   const handleServiceChange = (index, field, value) => {
@@ -68,20 +89,32 @@ const Regsalon = () => {
 
 
     try {
-      const response = await axiosInstance.post(
-        "/salons/",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            // Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log("Salon registered", response.data);
+      const requestConfig = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      };
+
+      let response;
+      if (editingSalon?.id) {
+        response = await axiosInstance.patch(
+          `/salons/${editingSalon.id}/`,
+          formData,
+          requestConfig
+        );
+        alert("Salon updated successfully!");
+      } else {
+        response = await axiosInstance.post(
+          "/salons/",
+          formData,
+          requestConfig
+        );
+        alert("Salon registered successfully!");
+      }
+
+      console.log("Salon saved", response.data);
       setErrors({});
       setSuccess(true);
-      alert("Salon registered successfully!");
       navigate('/Dashboard');
     } catch (err) {
       console.error("Registration error", err.response?.data);
@@ -140,7 +173,7 @@ const Regsalon = () => {
   return (
     <div className='salonReg'>
       <form onSubmit={handleSubmit}>
-        <h3>Enter your Salon details below</h3>
+        <h3>{editingSalon ? 'Update your Salon details' : 'Enter your Salon details below'}</h3>
 
         <label>
           Salon Name
@@ -230,6 +263,11 @@ const Regsalon = () => {
           multiple
           onChange={(e) => setGallery(e.target.files)}
         /><br/>
+        {editingSalon?.gallery?.length > 0 && !Gallery.length && (
+          <small style={{ display: 'block', marginBottom: '8px', color: '#555' }}>
+            Existing gallery images will remain unless you choose new ones.
+          </small>
+        )}
 
         <h4 style={{
           color: "#080808ff",

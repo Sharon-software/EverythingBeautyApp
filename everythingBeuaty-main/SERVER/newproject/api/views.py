@@ -1,22 +1,22 @@
-from rest_framework import generics
-from rest_framework.permissions import AllowAny
-from django.contrib.auth.models import User
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import viewsets
-from rest_framework.parsers import MultiPartParser, FormParser
-import random
-from django.core.mail import send_mail
-from django.contrib.auth import get_user_model
-from rest_framework.decorators import api_view, permission_classes, action
-from .models import Salon, Booking, Services, UserProfile, PendingUser
-from .serializers import SalonSerializer, BookingSerializer
-from django.conf import settings
-from rest_framework import status
-from django.utils.crypto import get_random_string
-from django.db.models import Q
+import json
 import logging
+import random
+
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.db.models import Q
+from django.utils.crypto import get_random_string
+from rest_framework import generics, status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .models import Booking, GalleryImage, PendingUser, Salon, Services, UserProfile
+from .serializers import BookingSerializer, SalonSerializer
 
 
 logger = logging.getLogger(__name__)
@@ -65,11 +65,99 @@ class SalonViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser]
 
     def get_permissions(self):
-        if self.action in ['create']:
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
             permission_classes = [IsAuthenticated]
         else:
             permission_classes = [AllowAny]
         return [permission() for permission in permission_classes]
+
+    def _save_services(self, salon, raw_services):
+        if not raw_services:
+            return
+
+        try:
+            services = json.loads(raw_services)
+        except (TypeError, ValueError):
+            raise ValueError("services must be valid JSON")
+
+        existing_services = {
+            service.id: service for service in salon.services_items.all()
+        }
+        for service in services:
+            service = service or {}
+            service_name = service.get('service_name')
+            price = service.get('price')
+            if service_name and price is not None:
+                service_id = service.get('id')
+                existing_service = existing_services.pop(service_id, None)
+                if existing_service:
+                    existing_service.service_name = service_name
+                    existing_service.price = price
+                    existing_service.save(update_fields=['service_name', 'price'])
+                else:
+                    Services.objects.create(salon=salon, service_name=service_name, price=price)
+
+        for service in existing_services.values():
+            if not Booking.objects.filter(service=service).exists():
+                service.delete()
+
+    def _save_gallery(self, salon, files):
+        if not files:
+            return
+
+        salon.gallery.all().delete()
+        for uploaded_file in files:
+            if uploaded_file:
+                GalleryImage.objects.create(salon=salon, image=uploaded_file)
+
+    def create(self, request, *args, **kwargs):
+        request_user = request.user
+        if not request_user or not request_user.is_authenticated:
+            return Response({"detail": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        services = request.data.get('services')
+        files = request.FILES.getlist('gallery_upload')
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        salon = serializer.save(owner=request_user)
+
+        try:
+            self._save_services(salon, services)
+            self._save_gallery(salon, files)
+        except ValueError as exc:
+            salon.delete()
+            return Response({"services": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        headers = self.get_success_headers(serializer.data)
+        response = self.get_serializer(salon, context={'request': request}).data
+        return Response(response, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        if instance.owner != request.user:
+            return Response({"detail": "You are not allowed to edit this salon."}, status=status.HTTP_403_FORBIDDEN)
+
+        services = request.data.get('services')
+        files = request.FILES.getlist('gallery_upload')
+
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        salon = serializer.save(owner=request.user)
+
+        if services is not None:
+            try:
+                self._save_services(salon, services)
+            except ValueError as exc:
+                return Response({"services": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        if files:
+            self._save_gallery(salon, files)
+
+        response = self.get_serializer(salon, context={'request': request}).data
+        return Response(response, status=status.HTTP_200_OK)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

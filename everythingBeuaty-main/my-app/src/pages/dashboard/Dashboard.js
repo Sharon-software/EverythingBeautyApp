@@ -143,87 +143,86 @@ const approvedToday = salonCustomerBookings.some(b => {
 
 
   return (
-    <div className="WelcomeMessage">
-      <label>Welcome {firstname}</label>
+    <main className="WelcomeMessage dashboard-shell">
+      <header className="dashboard-header">
+        <div>
+          <span className="dashboard-kicker">OWNER DASHBOARD</span>
+          <h1>Welcome, {firstname || "there"}</h1>
+          <p>Keep your salon and appointments in order.</p>
+        </div>
+        <span className="dashboard-date">{new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</span>
+      </header>
 
       {userSalons.length > 0 && (
-        <div className="UserSalonInfo">
-          <h4
-            style={{
-              fontSize: "1.5rem",
-              color: "#b2c0b2ff",
-              fontWeight: "bold",
-              textAlign: "center",
-            }}
-          >
-            You have {userSalons.length} salon(s) registered.
-          </h4>
+        <section className="UserSalonInfo dashboard-section">
+          <div className="dashboard-section-heading">
+            <div>
+              <span className="dashboard-kicker">YOUR BUSINESS</span>
+              <h2>Registered salons</h2>
+            </div>
+            <span className="dashboard-count">{userSalons.length} {userSalons.length === 1 ? "salon" : "salons"}</span>
+          </div>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", margin: "16px 0" }}>
+          <div className="salon-management-grid">
             {userSalons.map((salon) => (
-              <button
+              <article
                 key={salon.id}
-                type="button"
-                onClick={() => navigate('/RegSalon', { state: { salon } })}
-                style={{
-                  background: "#fff",
-                  border: "1px solid #d9bfdc",
-                  borderRadius: "12px",
-                  padding: "12px",
-                  minWidth: "220px",
-                  cursor: "pointer",
-                  textAlign: "left",
-                }}
+                className="salon-management-card"
               >
                 {salon.gallery?.[0] && (
                   <img
                     src={salon.gallery[0]}
                     alt={salon.salon_name}
-                    style={{ width: "100%", height: "120px", objectFit: "cover", borderRadius: "8px", marginBottom: "8px" }}
+                    className="salon-management-image"
                   />
                 )}
-                <div style={{ fontWeight: "700", color: "#4b1f4f" }}>{salon.salon_name}</div>
-                <div style={{ color: "#666" }}>{salon.location}</div>
-                <div style={{ color: "#8a4d80", marginTop: "6px" }}>Edit salon</div>
-              </button>
+                <div className="salon-management-details">
+                  <div>
+                    <h3>{salon.salon_name}</h3>
+                    <p>{salon.location}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="salon-edit-button"
+                    onClick={() => navigate('/RegSalon', { state: { salon } })}
+                    aria-label={`Edit ${salon.salon_name}`}
+                  >
+                    Edit salon
+                  </button>
+                </div>
+              </article>
             ))}
           </div>
 
-    <p> 
-     
-    Booking summary:
-    <span style={{color:"orange"}}> Approved: {bookingSummary.approved || 0}</span>
-    <span style={{color:"orange"}}> Pending: {bookingSummary.pending || 0}</span>
-    <span> Completed: {bookingSummary.completed || 0}</span>
-    <span> Incomplete: {bookingSummary.incomplete || 0}</span>
-    <span> Cancelled: {bookingSummary.cancelled || 0}</span>
-    <span> Declined: {bookingSummary.declined || 0}</span>
-  </p>
-  {approvedToday && (
-    <p style={{fontSize: "1.2rem",
-        color: "#84da72ff",
-        fontWeight: "bold",}}>
-
-         Reminder: You have an approved booking today! 
-        </p>
-       
-      )}
-        </div>
+          <div className="booking-summary">
+            <h3>Booking summary</h3>
+            <div className="booking-summary-grid">
+              <div className="summary-stat"><strong>{bookingSummary.approved || 0}</strong><span>Approved</span></div>
+              <div className="summary-stat"><strong>{bookingSummary.pending || 0}</strong><span>Pending</span></div>
+              <div className="summary-stat"><strong>{bookingSummary.completed || 0}</strong><span>Completed</span></div>
+              <div className="summary-stat"><strong>{bookingSummary.incomplete || 0}</strong><span>Incomplete</span></div>
+              <div className="summary-stat"><strong>{bookingSummary.cancelled || 0}</strong><span>Cancelled</span></div>
+              <div className="summary-stat"><strong>{bookingSummary.declined || 0}</strong><span>Declined</span></div>
+            </div>
+          </div>
+          {approvedToday && (
+            <p className="dashboard-reminder">You have an approved booking today.</p>
+          )}
+        </section>
       )}
       
 
-      <div style={{ marginBottom: "12px" }}>
+      <section className="dashboard-section dashboard-bookings-section">
+        <div className="dashboard-section-heading">
+          <div>
+            <span className="dashboard-kicker">APPOINTMENTS</span>
+            <h2>Booking activity</h2>
+          </div>
+        </div>
+        <div className="dashboard-toggle-row">
         <LoadingButton
           onClick={() => setShowMyBookings(!showMyBookings)}
-          style={{
-            padding: "8px 16px",
-            borderRadius: "5px",
-            backgroundColor: "#dcc5dfff",
-            border: "none",
-            cursor: "pointer",
-            color: "purple",
-            marginRight: "10px",
-          }}
+          className="dashboard-toggle-button"
         >
           {showMyBookings ? "Hide My Bookings" : "Show My Bookings"}
         </LoadingButton>
@@ -231,21 +230,14 @@ const approvedToday = salonCustomerBookings.some(b => {
         {userSalons.length > 0 && (
           <LoadingButton
             onClick={() => setShowCustomerBookings(!showCustomerBookings)}
-            style={{
-              padding: "8px 16px",
-              borderRadius: "5px",
-              backgroundColor: "#dcc5dfff",
-              border: "none",
-              cursor: "pointer",
-              color: "purple",
-            }}
+            className="dashboard-toggle-button"
           >
             {showCustomerBookings
               ? "Hide Customer Bookings"
               : "Show Customer Bookings"}
           </LoadingButton>
         )}
-      </div>
+        </div>
 
       {/* MY BOOKINGS */}
       {showMyBookings && (
@@ -260,13 +252,6 @@ const approvedToday = salonCustomerBookings.some(b => {
               <div
                 key={i}
                 className="book-card"
-                style={{
-                  backgroundColor: "rgb(235, 147, 213)",
-                  borderRadius: "10px",
-                  width: "30%",
-                  padding: "15px",
-                  marginBottom: "10px",
-                }}
               >
                 <p><strong>Salon:</strong> {b.salon_name}</p>
                 <p><strong>Service:</strong> {b.service_name}</p>
@@ -398,13 +383,6 @@ const approvedToday = salonCustomerBookings.some(b => {
               <div
                 key={i}
                 className="book-card"
-                style={{
-                  backgroundColor: "rgb(235, 147, 213)",
-                  borderRadius: "10px",
-                  width: "30%",
-                  padding: "15px",
-                  marginBottom: "10px",
-                }}
               >
                 <p><strong>Salon:</strong> {b.salon_name}</p>
                 <p><strong>Service:</strong> {b.service_name}</p>
@@ -477,13 +455,18 @@ const approvedToday = salonCustomerBookings.some(b => {
 
      
 
-      <h3>
+      </section>
+
+      <footer className="dashboard-footer-actions">
+        <h2>What would you like to do next?</h2>
+        <div>
         <label onClick={() => navigate("/RegSalon")}>REGISTER</label> your salon
         <br /> OR <br />
         <label onClick={() => navigate("/Book")}>BOOK</label> your next
         appointment
-      </h3>
-    </div>
+        </div>
+      </footer>
+    </main>
   );
 };
 

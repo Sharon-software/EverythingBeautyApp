@@ -22,6 +22,8 @@ services:
         sync: false
       - key: DEFAULT_FROM_EMAIL
         sync: false
+      - key: CLOUDINARY_URL
+        sync: false
 
   - type: web
     name: everythingbeauty-web

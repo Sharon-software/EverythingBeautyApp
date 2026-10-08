@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django.db import transaction
 from django.db.models import Q
 from django.utils.crypto import get_random_string
 from rest_framework import generics, status, viewsets
@@ -20,6 +21,10 @@ from .serializers import BookingSerializer, SalonSerializer
 
 
 logger = logging.getLogger(__name__)
+
+
+class GalleryUploadError(Exception):
+    pass
 
 
 def _send_verification_email(email, code):
@@ -105,10 +110,24 @@ class SalonViewSet(viewsets.ModelViewSet):
         if not files:
             return
 
-        salon.gallery.all().delete()
-        for uploaded_file in files:
-            if uploaded_file:
-                GalleryImage.objects.create(salon=salon, image=uploaded_file)
+        new_images = []
+        try:
+            for uploaded_file in files:
+                if uploaded_file:
+                    new_images.append(
+                        GalleryImage.objects.create(salon=salon, image=uploaded_file)
+                    )
+        except Exception as exc:
+            logger.exception("Failed to upload gallery images for salon %s", salon.pk)
+            for image in new_images:
+                try:
+                    image.delete()
+                except Exception:
+                    logger.exception("Failed to clean up partial gallery upload for salon %s", salon.pk)
+            raise GalleryUploadError from exc
+
+        if new_images:
+            salon.gallery.exclude(pk__in=[image.pk for image in new_images]).delete()
 
     def create(self, request, *args, **kwargs):
         request_user = request.user
@@ -118,19 +137,22 @@ class SalonViewSet(viewsets.ModelViewSet):
         services = request.data.get('services')
         files = request.FILES.getlist('gallery_upload')
 
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        salon = serializer.save(owner=request_user)
-
         try:
-            self._save_services(salon, services)
-            self._save_gallery(salon, files)
+            with transaction.atomic():
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                salon = serializer.save(owner=request_user)
+                self._save_services(salon, services)
+                self._save_gallery(salon, files)
+                response = self.get_serializer(salon, context={'request': request}).data
         except ValueError as exc:
-            salon.delete()
             return Response({"services": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        except GalleryUploadError:
+            return Response({
+                "detail": "Image upload failed. Check the Cloudinary API key, secret, and cloud name in Render."
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
-        headers = self.get_success_headers(serializer.data)
-        response = self.get_serializer(salon, context={'request': request}).data
+        headers = self.get_success_headers(response)
         return Response(response, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
@@ -143,20 +165,25 @@ class SalonViewSet(viewsets.ModelViewSet):
         services = request.data.get('services')
         files = request.FILES.getlist('gallery_upload')
 
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        salon = serializer.save(owner=request.user)
+        try:
+            with transaction.atomic():
+                serializer = self.get_serializer(instance, data=request.data, partial=partial)
+                serializer.is_valid(raise_exception=True)
+                salon = serializer.save(owner=request.user)
 
-        if services is not None:
-            try:
-                self._save_services(salon, services)
-            except ValueError as exc:
-                return Response({"services": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+                if services is not None:
+                    self._save_services(salon, services)
 
-        if files:
-            self._save_gallery(salon, files)
+                if files:
+                    self._save_gallery(salon, files)
 
-        response = self.get_serializer(salon, context={'request': request}).data
+                response = self.get_serializer(salon, context={'request': request}).data
+        except ValueError as exc:
+            return Response({"services": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        except GalleryUploadError:
+            return Response({
+                "detail": "Image upload failed. Check the Cloudinary API key, secret, and cloud name in Render."
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
         return Response(response, status=status.HTTP_200_OK)
 
     def perform_create(self, serializer):

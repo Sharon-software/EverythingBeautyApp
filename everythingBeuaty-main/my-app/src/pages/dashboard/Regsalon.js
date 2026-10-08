@@ -118,7 +118,12 @@ const Regsalon = () => {
       navigate('/Dashboard');
     } catch (err) {
       console.error("Registration error", err.response?.data);
-      setErrors(err.response?.data || {});
+      const responseData = err.response?.data;
+      setErrors(
+        responseData && typeof responseData === "object"
+          ? responseData
+          : { detail: "Salon could not be saved. Please try again." }
+      );
     }
   };
 
@@ -174,6 +179,11 @@ const Regsalon = () => {
     <div className='salonReg'>
       <form onSubmit={handleSubmit}>
         <h3>{editingSalon ? 'Update your Salon details' : 'Enter your Salon details below'}</h3>
+        {error.detail && (
+          <div role="alert" style={{ color: "red", marginBottom: "1rem" }}>
+            {error.detail}
+          </div>
+        )}
 
         <label>
           Salon Name

@@ -109,3 +109,23 @@ class SalonGalleryTests(TestCase):
 		self.assertEqual(salon.gallery.count(), 1)
 		self.assertEqual(service.service_name, "Haircut and Style")
 		self.assertEqual(str(service.price), "300.00")
+
+	@patch("api.views.GalleryImage.objects.create", side_effect=OSError("Cloudinary upload rejected"))
+	def test_failed_gallery_upload_rolls_back_salon_creation(self, _create_image):
+		image = SimpleUploadedFile("salon.jpg", b"fake-image-data", content_type="image/jpeg")
+		response = self.client.post(
+			"/api/v1/salons/",
+			{
+				"salon_name": "Incomplete Salon",
+				"location": "Cape Town",
+				"services": json.dumps([
+					{"service_name": "Haircut", "price": "250.00"},
+				]),
+				"gallery_upload": [image],
+			},
+			format="multipart",
+		)
+
+		self.assertEqual(response.status_code, 503)
+		self.assertIn("Cloudinary", response.data["detail"])
+		self.assertEqual(Salon.objects.count(), 0)

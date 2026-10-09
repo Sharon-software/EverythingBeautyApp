@@ -39,7 +39,7 @@ function App() {
         <Route path="/Book" element={<PrivateRoute><Book /></PrivateRoute>}></Route>
         <Route path="/Regsalon" element={<PrivateRoute><Regsalon /></PrivateRoute>}></Route>
         <Route path="/BookService" element={<PrivateRoute><BookService /></PrivateRoute>}></Route>
-        <Route path ="/ViewMore" element={<ViewMore />}></Route>
+        <Route path="/ViewMore/:salonId" element={<ViewMore />} />
         <Route path="/decline/:bookingId" element={<DeclineModal />} />
         
         <Route path="/bookings" element={<Bookings/> } />

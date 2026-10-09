@@ -186,6 +186,17 @@ class SalonViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
         return Response(response, status=status.HTTP_200_OK)
 
+    def destroy(self, request, *args, **kwargs):
+        salon = self.get_object()
+        if salon.owner != request.user:
+            return Response(
+                {"detail": "You are not allowed to delete this salon."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        self.perform_destroy(salon)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 

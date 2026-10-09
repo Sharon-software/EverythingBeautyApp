@@ -78,6 +78,7 @@ class SalonGalleryTests(TestCase):
 		salon = Salon.objects.get(salon_name="Beauty House")
 		self.assertEqual(salon.gallery.count(), 1)
 		self.assertTrue(salon.services_items.filter(service_name="Haircut").exists())
+		self.assertEqual(response.data["owner_name"], "Owner")
 		self.assertIn("/media/", response.data["gallery"][0])
 		gallery_image = salon.gallery.get().image
 		with override_settings(DEBUG=False):
@@ -109,6 +110,36 @@ class SalonGalleryTests(TestCase):
 		self.assertEqual(salon.gallery.count(), 1)
 		self.assertEqual(service.service_name, "Haircut and Style")
 		self.assertEqual(str(service.price), "300.00")
+
+	def test_salon_owner_can_delete_salon(self):
+		salon = Salon.objects.create(
+			salon_name="Beauty House",
+			owner=self.user,
+			location="22 Main Street, Cape Town",
+		)
+
+		response = self.client.delete(f"/api/v1/salons/{salon.id}/")
+
+		self.assertEqual(response.status_code, 204)
+		self.assertFalse(Salon.objects.filter(id=salon.id).exists())
+
+	def test_other_user_cannot_delete_salon(self):
+		salon = Salon.objects.create(
+			salon_name="Beauty House",
+			owner=self.user,
+			location="22 Main Street, Cape Town",
+		)
+		other_user = get_user_model().objects.create_user(
+			username="other@example.com",
+			email="other@example.com",
+			password="secret123",
+		)
+		self.client.force_authenticate(user=other_user)
+
+		response = self.client.delete(f"/api/v1/salons/{salon.id}/")
+
+		self.assertEqual(response.status_code, 403)
+		self.assertTrue(Salon.objects.filter(id=salon.id).exists())
 
 	@patch("api.views.GalleryImage.objects.create", side_effect=OSError("Cloudinary upload rejected"))
 	def test_failed_gallery_upload_rolls_back_salon_creation(self, _create_image):

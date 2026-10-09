@@ -101,7 +101,7 @@ The repository includes a `render.yaml` Blueprint for the React static site, Dja
 
 Set `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, and `DEFAULT_FROM_EMAIL` in the API service to enable account verification and password-reset email. Rotate the Gmail app password previously present in source before deploying. Without SMTP credentials, Django uses its console email backend and email workflows will not reach users.
 
-Salon photos currently use local filesystem storage. Render's filesystem is ephemeral, so configure durable object storage before relying on uploaded photos in production.
+Salon photos use Cloudinary in production because Render's local filesystem is ephemeral. Before deploying, set `CLOUDINARY_URL` on the `everythingbeauty-api` service in Render to the Cloudinary URL from your Cloudinary dashboard (`cloudinary://API_KEY:API_SECRET@CLOUD_NAME`). The API now refuses to start without this setting rather than accepting uploads that can disappear after a restart. Local development continues to use the local media folder. Photos uploaded to an earlier ephemeral deployment are not recoverable from this change and must be uploaded again.
 
 ## 📡 API Overview
 

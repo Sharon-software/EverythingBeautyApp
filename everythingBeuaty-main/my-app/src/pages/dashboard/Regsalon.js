@@ -171,7 +171,21 @@ const Regsalon = () => {
   };
 
   const handleSelect = (suggestion) => {
-    setLocation(suggestion.display_name);
+    const address = suggestion.address || {};
+    const typedStreet = Location.split(",")[0].trim();
+    const typedHouseNumber = typedStreet.match(/^\d+[a-z]?/i)?.[0];
+    const streetName = address.road || address.pedestrian || address.footway;
+    const streetAddress = streetName
+      ? [address.house_number || typedHouseNumber, streetName].filter(Boolean).join(" ")
+      : (typedHouseNumber ? typedStreet : suggestion.display_name);
+    const locality = [
+      address.suburb || address.neighbourhood,
+      address.city || address.town || address.village,
+      address.state,
+      address.postcode,
+      address.country,
+    ].filter(Boolean);
+    setLocation([streetAddress || suggestion.display_name, ...locality].filter(Boolean).join(", "));
     setSuggestions([]); // hide dropdown
   };
 
@@ -198,15 +212,16 @@ const Regsalon = () => {
         {error.salon_name && <div style={{ color: "red" }}>{error.salon_name}</div>}
 
         <label>
-          Location
+          Full address (street number and name)
           <input
             type="text"
-            placeholder="Enter your location"
+            placeholder="e.g. 22 Main Street, Cape Town"
             value={Location}
             onChange={handleChange}
             required
           />
         </label>
+        <small>Choose a suggestion, then check that the street number and name are correct. You can edit the address here.</small>
          {loading && (
         <div style={{ fontSize: "0.9rem", color: "#666", marginTop: "0.25rem" }}>
           Searching...

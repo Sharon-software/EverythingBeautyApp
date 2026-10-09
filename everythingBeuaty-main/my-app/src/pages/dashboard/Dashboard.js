@@ -24,6 +24,7 @@ const Dashboard = () => {
   const [showCustomerBookings, setShowCustomerBookings] = useState(false);
   const [declineBookingId, setDeclineBookingId] = useState(null);
   const [showRatingForm, setShowRatingForm] = useState(null);
+  const [deletingSalonId, setDeletingSalonId] = useState(null);
 
   // Fetch user info
   useEffect(() => {
@@ -89,6 +90,24 @@ const Dashboard = () => {
     } catch (err) {
       console.error(err);
       alert("Failed to cancel booking. Try again later.");
+    }
+  };
+
+  const handleDeleteSalon = async (salon) => {
+    const confirmed = window.confirm(
+      `Delete ${salon.salon_name}? This also permanently deletes its services and bookings.`
+    );
+    if (!confirmed) return;
+
+    setDeletingSalonId(salon.id);
+    try {
+      await axiosInstance.delete(`/salons/${salon.id}/`);
+      setSalons((currentSalons) => currentSalons.filter((item) => item.id !== salon.id));
+    } catch (err) {
+      console.error(err);
+      alert("Could not delete this salon. Please try again.");
+    } finally {
+      setDeletingSalonId(null);
     }
   };
 
@@ -181,14 +200,23 @@ const approvedToday = salonCustomerBookings.some(b => {
                     <h3>{salon.salon_name}</h3>
                     <p>{salon.location}</p>
                   </div>
-                  <button
-                    type="button"
-                    className="salon-edit-button"
-                    onClick={() => navigate('/RegSalon', { state: { salon } })}
-                    aria-label={`Edit ${salon.salon_name}`}
-                  >
-                    Edit salon
-                  </button>
+                  <div className="salon-management-actions">
+                    <button
+                      type="button"
+                      className="salon-edit-button"
+                      onClick={() => navigate('/RegSalon', { state: { salon } })}
+                    >
+                      Edit salon
+                    </button>
+                    <button
+                      type="button"
+                      className="salon-delete-button"
+                      onClick={() => handleDeleteSalon(salon)}
+                      disabled={deletingSalonId === salon.id}
+                    >
+                      {deletingSalonId === salon.id ? "Deleting..." : "Delete salon"}
+                    </button>
+                  </div>
                 </div>
               </article>
             ))}

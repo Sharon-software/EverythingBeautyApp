@@ -1,5 +1,6 @@
 import os
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 from newproject.settings import *
 from newproject.settings import BASE_DIR
 
@@ -14,6 +15,8 @@ DEBUG = False
 SECRET_KEY = os.environ["SECRET_KEY"]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+if not os.environ.get("CLOUDINARY_URL"):
+    raise ImproperlyConfigured("CLOUDINARY_URL must be configured for production image storage.")
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -32,11 +35,7 @@ MIDDLEWARE = [
 
 STORAGES = {
     "default": {
-        "BACKEND": (
-            "cloudinary_storage.storage.MediaCloudinaryStorage"
-            if os.environ.get("CLOUDINARY_URL")
-            else "django.core.files.storage.FileSystemStorage"
-        ),
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",

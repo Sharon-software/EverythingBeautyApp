@@ -12,12 +12,16 @@ class ServicesSerializer(serializers.ModelSerializer):
 
 class SalonSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.email')
+    owner_name = serializers.SerializerMethodField()
     services_list = ServicesSerializer(source='services_items', many=True, read_only=True)
     gallery = serializers.SerializerMethodField()
     
     class Meta:
         model = Salon
-        fields = ['id', 'salon_name', 'owner', 'location', 'startT', 'endT', 'gallery', 'services_list']
+        fields = ['id', 'salon_name', 'owner', 'owner_name', 'location', 'startT', 'endT', 'gallery', 'services_list']
+
+    def get_owner_name(self, obj):
+        return obj.owner.get_full_name()
 
     def get_gallery(self, obj):
         request = self.context.get('request')

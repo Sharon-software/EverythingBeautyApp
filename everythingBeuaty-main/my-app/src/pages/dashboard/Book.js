@@ -101,7 +101,7 @@ const Book = () => {
 
         
        <LoadingButton onClick ={()=> navigate("/BookService",{state:{salon}})}>Book Now</LoadingButton> 
-       <LoadingButton onClick ={()=> navigate("/ViewMore")}>View More</LoadingButton> 
+      <LoadingButton onClick ={()=> navigate(`/ViewMore/${salon.id}`, { state: { salon } })}>View More</LoadingButton>
       </div>
 
       </div>

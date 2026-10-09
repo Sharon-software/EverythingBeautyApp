@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axiosInstance from '../../Axiosinstance';
 import axios from 'axios';
 import LoadingButton from '../Loading';
+import { useToast } from '../../ToastContext';
 
 const Regsalon = () => {
   const [salonName, setSalonName] = useState("");
@@ -14,6 +15,7 @@ const Regsalon = () => {
   const [error, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+  const showToast = useToast();
   const [suggestions, setSuggestions] = useState([])
   const [loading, setLoading] = useState(false);
   const location = useLocation();
@@ -102,14 +104,14 @@ const Regsalon = () => {
           formData,
           requestConfig
         );
-        alert("Salon updated successfully!");
+        showToast("Salon updated successfully.", "success");
       } else {
         response = await axiosInstance.post(
           "/salons/",
           formData,
           requestConfig
         );
-        alert("Salon registered successfully!");
+        showToast("Salon registered successfully.", "success");
       }
 
       console.log("Salon saved", response.data);
@@ -119,6 +121,10 @@ const Regsalon = () => {
     } catch (err) {
       console.error("Registration error", err.response?.data);
       const responseData = err.response?.data;
+      showToast(
+        responseData?.detail || responseData?.message || "Salon could not be saved. Please try again.",
+        "error"
+      );
       setErrors(
         responseData && typeof responseData === "object"
           ? responseData

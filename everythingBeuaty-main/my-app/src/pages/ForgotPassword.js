@@ -3,19 +3,21 @@ import { useState } from "react";
 import axios from "axios";
 import LoadingButton from './Loading';
 import { baseUrl } from '../Axiosinstance';
+import { useToast } from '../ToastContext';
 
 
 const ForgotPassword = () => {
 const [email, setEmail] = useState("");
+const showToast = useToast();
 
 const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
         await axios.post(`${baseUrl}/forgot-password/`, { email });
-        alert("Password reset link sent to your email.");
+        showToast("Password reset link sent to your email.", "success");
     } catch (err) {
-        alert("Failed to send reset link. Please try again.");
+        showToast("Failed to send reset link. Please try again.", "error");
     }   
 };
 

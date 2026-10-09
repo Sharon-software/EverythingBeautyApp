@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FaSpinner } from 'react-icons/fa'; 
 import LoadingButton from './Loading';
 import { baseUrl } from '../Axiosinstance';
+import { useToast } from '../ToastContext';
 
 function getCookie(name) {
   let cookieValue = null;
@@ -32,6 +33,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const showToast = useToast();
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -73,7 +75,7 @@ const Register = () => {
   const handleVerify = async (e) => {
     e.preventDefault();
     if (!email || !code) {
-      alert("Email or verification code missing");
+      showToast("Email or verification code missing", "error");
       return;
     }
 
@@ -88,7 +90,7 @@ const Register = () => {
         timeout: 15000,
       });
 
-      alert("Account verified! You can now login.");
+      showToast("Account verified! You can now login.", "success");
       navigate('/login');
     } catch (err) {
       const responseData = err.response?.data || {};
@@ -116,7 +118,7 @@ const Register = () => {
           <input type="password" placeholder="Enter Password" value={password} onChange={(e) => setPassword(e.target.value)} />
           {error.password && <small className="text-danger">{error.password}</small>}
 
-          <button type="submit" disabled={loading} aria-label={loading ? "Sending verification code" : "Register Account"}>
+          <button className="auth-action-button" type="submit" disabled={loading} aria-label={loading ? "Sending verification code" : "Register Account"}>
             {loading ? <FaSpinner className="spin" /> : "Register Account"}
           </button>
           {statusMessage && <small role="status">{statusMessage}</small>}
@@ -131,7 +133,7 @@ const Register = () => {
           {error.email && <small className="text-danger">{error.email}</small>}
           <input type="text" placeholder="Enter Verification Code" value={code} onChange={(e) => setCode(e.target.value)} />
           {error.code && <small className="text-danger">{error.code}</small>}
-          <LoadingButton type="submit" disabled={loading}>Verify Account</LoadingButton>
+          <LoadingButton type="submit" className="auth-action-button" disabled={loading}>Verify Account</LoadingButton>
         </form>
       )}
     </div>

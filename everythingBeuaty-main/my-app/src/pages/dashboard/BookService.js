@@ -2,25 +2,27 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../../Axiosinstance";
 import LoadingButton from "../Loading";
+import { useToast } from "../../ToastContext";
 
 const BookService = () => {
   const [showPicker, setShowPicker] = useState(false);
   const [dateTime, setDateTime] = useState("");
   const [selectedServiceId, setSelectedServiceId] = useState("");
   const navigate = useNavigate();
+  const showToast = useToast();
   const location = useLocation();
   const selectedSalon = location.state?.salon || null;
   const token = localStorage.getItem("accessToken");
 
   const handleConfirm = async () => {
-    if (!dateTime) 
-      return alert("Please select a date and time!");
-    if (!selectedServiceId) 
-      return alert("Please select a service!");
+    if (!dateTime)
+      return showToast("Please select a date and time!", "error");
+    if (!selectedServiceId)
+      return showToast("Please select a service!", "error");
 
     const selected = new Date(dateTime);
     const now = new Date();
-    if (selected < now) return alert("Cannot choose a past date/time!");
+    if (selected < now) return showToast("Cannot choose a past date/time!", "error");
 
     // Check salon working hours
     if (selectedSalon) {
@@ -30,7 +32,7 @@ const BookService = () => {
       const endTotal = endHour * 60 + endMin;
       const selectedTotal = selected.getHours() * 60 + selected.getMinutes();
       if (selectedTotal < startTotal || selectedTotal > endTotal) {
-        return alert(`Choose a time between ${selectedSalon.startT} - ${selectedSalon.endT}`);
+        return showToast(`Choose a time between ${selectedSalon.startT} - ${selectedSalon.endT}`, "error");
       }
     }
 
@@ -46,11 +48,11 @@ const BookService = () => {
       );
 
       const serviceObj = selectedSalon.services_list.find(s => s.id === parseInt(selectedServiceId));
-      alert(`Booking confirmed for ${serviceObj.service_name} at ${selectedSalon.salon_name} on ${selected.toLocaleString()} you will receive an email once the salon confirms your booking.`);
+      showToast(`Booking confirmed for ${serviceObj.service_name} at ${selectedSalon.salon_name} on ${selected.toLocaleString()}. You will receive an email once the salon confirms your booking.`, "success");
       navigate("/dashboard");
     } catch (err) {
       console.error("Booking error:", err.response?.data || err.message);
-      alert("Failed to save booking.");
+      showToast("Failed to save booking.", "error");
     }
   };
 

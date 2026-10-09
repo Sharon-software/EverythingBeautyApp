@@ -22,10 +22,12 @@ import BookService from './pages/dashboard/BookService';
 import ViewMore from './pages/dashboard/ViewMore';
 import DeclineModal from './pages/dashboard/DeclineModal';
 import ForgotPassword from './pages/ForgotPassword';
+import { ToastProvider } from './ToastContext';
 
 function App() {
   return (
     <>
+    <ToastProvider>
     <AuthContext>
       
       <Navbar />
@@ -50,6 +52,7 @@ function App() {
       </Routes>
       
     </AuthContext>
+    </ToastProvider>
     </>
   );
 }

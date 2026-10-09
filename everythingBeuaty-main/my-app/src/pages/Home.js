@@ -87,7 +87,7 @@ const Navbar = () => {
         
         {error && <div className="text-danger"> {error} </div>}
 
-        <LoadingButton type="submit" variant="contained">
+        <LoadingButton type="submit" variant="contained" className="auth-action-button">
                   Login
              </LoadingButton>
              <br />

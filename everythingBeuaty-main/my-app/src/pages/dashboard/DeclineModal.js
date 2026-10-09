@@ -2,12 +2,14 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axiosInstance from "../../Axiosinstance";
+import { useToast } from "../../ToastContext";
 
 
 
 const DeclineModal = () => {
   const { bookingId } = useParams(); 
   const navigate = useNavigate();
+  const showToast = useToast();
   const [selectedReason, setSelectedReason] = useState("");
   const [customReason, setCustomReason] = useState("");
   const DECLINE_REASONS = [
@@ -25,7 +27,7 @@ const DeclineModal = () => {
       selectedReason === "Other (please specify)" ? customReason : selectedReason;
 
     if (!finalReason.trim()) {
-      alert("Please select or enter a reason.");
+      showToast("Please select or enter a reason.", "error");
       return;
     }
 
@@ -33,11 +35,11 @@ const DeclineModal = () => {
       await axiosInstance.post(`/bookings/${bookingId}/decline/`, {
         decline_reason: finalReason
       });
-      alert("Booking declined successfully!");
+      showToast("Booking declined successfully!", "success");
       navigate("/dashboard"); // back to dashboard
     } catch (err) {
       console.error(err);
-      alert("Failed to decline booking. Please try again.");
+      showToast("Failed to decline booking. Please try again.", "error");
     }
   };
 

@@ -6,12 +6,14 @@ import axiosInstance from "../../Axiosinstance";
 import DeclineModal from "../dashboard/DeclineModal";
 import RatingForm from "./RatingForm";
 import LoadingButton from "../Loading";
+import { useToast } from "../../ToastContext";
 
 const Dashboard = () => {
   const [firstname, setFirstname] = useState("");
   const [email, setEmail] = useState("");
   const { isLoggedIn } = useContext(AuthProvider);
   const navigate = useNavigate();
+  const showToast = useToast();
 
   const [salons, setSalons] = useState([]);
   const [bookings, setBookings] = useState([]);
@@ -89,7 +91,7 @@ const Dashboard = () => {
       fetchBookings();
     } catch (err) {
       console.error(err);
-      alert("Failed to cancel booking. Try again later.");
+      showToast("Failed to cancel booking. Try again later.", "error");
     }
   };
 
@@ -105,7 +107,7 @@ const Dashboard = () => {
       setSalons((currentSalons) => currentSalons.filter((item) => item.id !== salon.id));
     } catch (err) {
       console.error(err);
-      alert("Could not delete this salon. Please try again.");
+      showToast("Could not delete this salon. Please try again.", "error");
     } finally {
       setDeletingSalonId(null);
     }
@@ -128,10 +130,10 @@ const handleComplete = async (bookingId) => {
   try {
     await axiosInstance.patch(`/bookings/${bookingId}/`, { status: "completed" });
     await fetchBookings(); // refresh list
-    alert("Service marked as completed!");
+    showToast("Service marked as completed!", "success");
   } catch (err) {
     console.error(err);
-    alert("Failed to complete service. Please try again.");
+    showToast("Failed to complete service. Please try again.", "error");
   }
 };
 
@@ -140,10 +142,10 @@ const handleIncomplete = async (bookingId) => {
   try {
     await axiosInstance.patch(`/bookings/${bookingId}/`, { status: "incomplete" });
     await fetchBookings(); // refresh list
-    alert("Service marked as incomplete.");
+    showToast("Service marked as incomplete.", "success");
   } catch (err) {
     console.error(err);
-    alert("Failed to mark as incomplete. Please try again.");
+    showToast("Failed to mark as incomplete. Please try again.", "error");
   }
 };
 

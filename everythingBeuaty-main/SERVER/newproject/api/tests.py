@@ -79,6 +79,7 @@ class SalonGalleryTests(TestCase):
 		self.assertEqual(salon.gallery.count(), 1)
 		self.assertTrue(salon.services_items.filter(service_name="Haircut").exists())
 		self.assertEqual(response.data["owner_name"], "Owner")
+		self.assertEqual(response.data["services_list"][0]["service_name"], "Haircut")
 		self.assertIn("/media/", response.data["gallery"][0])
 		gallery_image = salon.gallery.get().image
 		with override_settings(DEBUG=False):
